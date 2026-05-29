@@ -75,7 +75,7 @@
       <HintPath>..\..\BepInEx\core\BepInEx.Unity.Mono.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="BepInEx.Unity" Condition="Exists('..\..\BepInEx\core\BepInEx.Unity.dll')">
+    <Reference Include="BepInEx.Unity" Condition="!Exists('..\..\BepInEx\core\BepInEx.Unity.Mono.dll') And Exists('..\..\BepInEx\core\BepInEx.Unity.dll')">
       <HintPath>..\..\BepInEx\core\BepInEx.Unity.dll</HintPath>
       <Private>false</Private>
     </Reference>
