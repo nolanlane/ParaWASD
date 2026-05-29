@@ -1,6 +1,10 @@
 # ParaWASD
 
-ParaWASD is a BepInEx plugin for Paralives that adds a closer play camera and direct WASD control for the selected Para.
+<a href="https://ibb.co/SwDrBpcP">
+  <img src="https://i.ibb.co/4Rwdpx27/output-image.png" alt="ParaWASD title image" width="100%">
+</a>
+
+ParaWASD is a BepInEx plugin for Paralives that adds an eye-level camera and direct WASD movement for the selected Para.
 
 Version: 0.96b
 
@@ -64,7 +68,7 @@ BepInEx/plugins/ParaWASD.dll
 ## Known Issues
 
 - Stairs are not supported yet.
-- Movement may be rough around tight spaces, unusual lots, or complex NavMesh layouts.
+- Movement can be uneven around tight spaces, unusual lots, or complex NavMesh layouts.
 - ParaWASD is intended for mouse and keyboard play.
 
 ## Troubleshooting
@@ -75,7 +79,9 @@ BepInEx/plugins/ParaWASD.dll
 
 ## Support
 
-Optional tips are welcome, but they do not purchase support, features, or priority fixes. If a donation link is added, use a payment option that is allowed for creator tips in your region and account type.
+Optional tips are welcome, but they do not include support, feature requests, or priority fixes.
+
+- [Leave a tip on Venmo](https://venmo.com/code?user_id=2620855699898368041&created=1780019478)
 
 ## Building From Source
 
