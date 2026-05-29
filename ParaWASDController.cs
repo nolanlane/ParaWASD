@@ -243,7 +243,9 @@ namespace ParaWASD
             var hybridPlayer = PlayerManager.Instance.HybridPlayer1;
             _gameCamera = hybridPlayer.HybridCamera.Camera;
 
-            _followedCharacterGUID = player.CameraCurrentCharacterFollowTarget;
+            _followedCharacterGUID = player.GetSelectedCharacterGUID();
+            if (_followedCharacterGUID == 0)
+                _followedCharacterGUID = player.CameraCurrentCharacterFollowTarget;
 
             if (_followedCharacterGUID == 0 && HouseholdManager.Instance != null && HouseholdManager.Instance.HasCurrentHousehold)
             {
@@ -254,6 +256,8 @@ namespace ParaWASD
 
             if (_followedCharacterGUID == 0)
                 return false;
+
+            player.CameraCurrentCharacterFollowTarget = _followedCharacterGUID;
 
             _followedVisual = CharacterManager.Instance.GetLoadedCharacterVisual(_followedCharacterGUID);
             if (_followedVisual == null)
