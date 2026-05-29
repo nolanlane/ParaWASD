@@ -19,16 +19,19 @@ Version: 0.96b
 ## Requirements
 
 - Paralives
-- BepInEx for Unity Mono
+- [BepInEx for Unity Mono](https://docs.bepinex.dev/master/articles/user_guide/installation/unity_mono.html)
 - Mouse and keyboard
 
 ParaWASD does not include BepInEx. Install BepInEx first, then install the plugin.
 
 ## Installation
 
-1. Install BepInEx for Paralives.
-2. Download `ParaWASD-0.96b.zip`.
-3. Extract the zip into the Paralives game folder.
+1. Install BepInEx for Unity Mono using the [official BepInEx guide](https://docs.bepinex.dev/master/articles/user_guide/installation/unity_mono.html).
+   - Use the Windows x64 Unity Mono build for the standard Windows release of Paralives.
+   - Extract BepInEx into the Paralives game folder, the same folder that contains the game executable.
+   - Start the game once so BepInEx can create its folders, then close the game.
+2. Download [ParaWASD-0.96b.zip](https://github.com/nolanlane/ParaWASD/releases/download/0.96b/ParaWASD-0.96b.zip).
+3. Extract the ParaWASD zip into the Paralives game folder.
 4. Start the game.
 
 After extraction, the plugin should be at:
@@ -69,6 +72,10 @@ BepInEx/plugins/ParaWASD.dll
 - If ParaWASD does not load, confirm BepInEx starts correctly and `ParaWASD.dll` is in `BepInEx/plugins`.
 - If the camera does not toggle, make sure a Para is selected or available in the active household.
 - Check the BepInEx log for messages prefixed with `[Info   :ParaWASD]` or `[ParaWASD]`.
+
+## Support
+
+Optional tips are welcome, but they do not purchase support, features, or priority fixes. If a donation link is added, use a payment option that is allowed for creator tips in your region and account type.
 
 ## Building From Source
 
