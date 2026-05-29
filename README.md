@@ -54,7 +54,6 @@ BepInEx/plugins/ParaWASD.dll
 | `Left Shift` | Sprint |
 | `C` | Cancel the current queued action |
 | `Left Alt` | Toggle cursor mode |
-| `Escape` | Exit ParaWASD when no interaction menu is open |
 
 ## Interaction Menus
 
