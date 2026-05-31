@@ -61,7 +61,7 @@ BepInEx/plugins/ParaWASD.dll
 After ParaWASD runs once, BepInEx creates the config file at:
 
 ```text
-BepInEx/config/com.knowyourlane.parawasd.cfg
+BepInEx/config/com.parawasd.plugin.cfg
 ```
 
 You can adjust mouse sensitivity, invert mouse Y, pitch limits, field of view, optional camera smoothing, camera offsets, movement speed, and sprint speed.

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ParaWASD
 {
-    [BepInPlugin("com.knowyourlane.parawasd", "ParaWASD", "0.96.1-beta")]
+    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.96.1-beta")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -35,7 +35,7 @@ namespace ParaWASD
 
             BindConfig();
 
-            _harmony = new Harmony("com.knowyourlane.parawasd");
+            _harmony = new Harmony("com.parawasd.plugin");
             _harmony.PatchAll();
 
             Logger.LogInfo("ParaWASD loaded. Press F6 to toggle.");
