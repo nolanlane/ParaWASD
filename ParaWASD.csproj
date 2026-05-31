@@ -10,8 +10,9 @@
   <PropertyGroup>
     <BepInExRoot Condition="'$(BepInExRoot)' == ''">..\..\BepInEx</BepInExRoot>
     <BepInExCorePath>$(BepInExRoot)\core</BepInExCorePath>
-    <BepInExTarget Condition="'$(BepInExTarget)' == '' And Exists('$(BepInExCorePath)\BepInEx.Unity.Mono.dll')">6UnityMono</BepInExTarget>
-    <BepInExTarget Condition="'$(BepInExTarget)' == '' And Exists('$(BepInExCorePath)\BepInEx.Unity.dll')">6Unity</BepInExTarget>
+    <!-- Ship target is BepInEx 5. Default to it so a plain build can never produce a
+         BepInEx 6 Mono DLL, which BepInEx 5 silently skips ("0 plugins to load").
+         Pass -p:BepInExTarget=6UnityMono or 6Unity only for deliberate local testing. -->
     <BepInExTarget Condition="'$(BepInExTarget)' == ''">5</BepInExTarget>
   </PropertyGroup>
 

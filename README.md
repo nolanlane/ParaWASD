@@ -6,9 +6,9 @@
 
 ParaWASD is a BepInEx plugin for Paralives that adds an eye-level camera and direct WASD movement for the selected Para.
 
-Version: 0.97.1 beta
+Version: 0.97.2 beta
 
-0.97.1 is a beta release for BepInEx 5 compatibility and center-screen interactions. Use 0.96c if you want the current stable release.
+0.97.2 is a beta release for BepInEx 5 compatibility and center-screen interactions. Use 0.96c if you want the current stable release.
 
 ## Features
 
@@ -56,7 +56,7 @@ ParaWASD is built for BepInEx 5 on Windows x64.
 
 ### Manual
 
-1. Download [ParaWASD-0.97.1-beta.zip](https://github.com/nolanlane/ParaWASD/releases/download/0.97.1/ParaWASD-0.97.1-beta.zip).
+1. Download [ParaWASD-0.97.2-beta.zip](https://github.com/nolanlane/ParaWASD/releases/download/0.97.2/ParaWASD-0.97.2-beta.zip).
 2. Extract the ParaWASD zip into the Paralives game folder.
 3. Start the game.
 
