@@ -42,6 +42,13 @@ namespace ParaWASD.Patches
 
             return true;
         }
+
+        // Drives the F6 toggle. Paralives destroys the BepInEx manager GameObject during
+        // scene cleanup, so Plugin.Update stops firing; CursorManager is a global manager
+        // that keeps ticking every frame, and this Harmony patch lives in the game assembly
+        // (not on the destroyed manager), so it keeps polling F6. Postfixes run even when the
+        // Prefix above skips the original body.
+        static void Postfix() => Plugin.Instance?.Tick();
     }
 
     [HarmonyPatch(typeof(InputManager), "GetCursorPosition")]

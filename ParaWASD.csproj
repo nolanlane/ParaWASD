@@ -1,28 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AssemblyName>ParaWASD</AssemblyName>
     <Description>WASD movement and first-person camera mod for Paralives</Description>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <BepInExRoot Condition="'$(BepInExRoot)' == ''">..\..\BepInEx</BepInExRoot>
-    <BepInExCorePath>$(BepInExRoot)\core</BepInExCorePath>
-    <!-- Ship target is BepInEx 5. Default to it so a plain build can never produce a
-         BepInEx 6 Mono DLL, which BepInEx 5 silently skips ("0 plugins to load").
-         Pass -p:BepInExTarget=6UnityMono or 6Unity only for deliberate local testing. -->
-    <BepInExTarget Condition="'$(BepInExTarget)' == ''">5</BepInExTarget>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(BepInExTarget)' == '6UnityMono'">
-    <DefineConstants>$(DefineConstants);BEPINEX_UNITY_MONO</DefineConstants>
   </PropertyGroup>
 
   <!-- Game assemblies (do not copy to output - they exist at runtime) -->
@@ -80,25 +67,15 @@
       <Private>false</Private>
     </Reference>
 
-    <!-- BepInEx + Harmony -->
-    <Reference Include="BepInEx.Core" Condition="'$(BepInExTarget)' == '6UnityMono' Or '$(BepInExTarget)' == '6Unity'">
-      <HintPath>$(BepInExCorePath)\BepInEx.Core.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="BepInEx.Unity.Mono" Condition="'$(BepInExTarget)' == '6UnityMono'">
-      <HintPath>$(BepInExCorePath)\BepInEx.Unity.Mono.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="BepInEx.Unity" Condition="'$(BepInExTarget)' == '6Unity'">
-      <HintPath>$(BepInExCorePath)\BepInEx.Unity.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="BepInEx" Condition="'$(BepInExTarget)' == '5'">
-      <HintPath>$(BepInExCorePath)\BepInEx.dll</HintPath>
+    <!-- BepInEx 5 + Harmony. Ship target is BepInEx 5.4.x; reference its assembly
+         directly so a build can never pick up the BepInEx 6 Mono DLLs that also live
+         in this game's core folder (BepInEx 5 silently skips a BepInEx 6 plugin). -->
+    <Reference Include="BepInEx">
+      <HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>$(BepInExCorePath)\0Harmony.dll</HintPath>
+      <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

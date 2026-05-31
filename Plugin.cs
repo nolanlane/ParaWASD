@@ -1,16 +1,13 @@
 using BepInEx;
 using BepInEx.Configuration;
-#if BEPINEX_UNITY_MONO
-using BepInEx.Unity.Mono;
-#endif
 using HarmonyLib;
 using UnityEngine;
 
 namespace ParaWASD
 {
     // BepInEx 5 parses this with System.Version, which rejects pre-release suffixes
-    // like "-beta". Keep it strictly numeric; the "beta" label lives in the release only.
-    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.97.3")]
+    // like "-beta". Keep it strictly numeric; any "beta" label lives in the release only.
+    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.96.5")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -26,8 +23,6 @@ namespace ParaWASD
         internal static ConfigEntry<float> ForwardOffset { get; private set; }
         internal static ConfigEntry<float> MoveSpeed { get; private set; }
         internal static ConfigEntry<float> SprintMultiplier { get; private set; }
-        internal static ConfigEntry<bool> CenterInteractEnabled { get; private set; }
-        internal static ConfigEntry<float> CenterInteractDistance { get; private set; }
 
         private Harmony _harmony;
         private ParaWASDController _controller;
@@ -100,21 +95,26 @@ namespace ParaWASD
                 "SprintMultiplier",
                 2.0f,
                 new ConfigDescription("Movement speed multiplier while holding Left Shift.", new AcceptableValueRange<float>(1f, 4f)));
-
-            CenterInteractEnabled = Config.Bind("Interaction", "CenterInteractEnabled", true, "Press E in look mode to open interactions for the object, floor, terrain, or character at the center of the camera.");
-            CenterInteractDistance = Config.Bind(
-                "Interaction",
-                "CenterInteractDistance",
-                25f,
-                new ConfigDescription("Maximum distance for center-screen look interactions.", new AcceptableValueRange<float>(1f, 100f)));
         }
 
-        private void Update()
+        private int _lastToggleFrame = -1;
+
+        // On BepInEx 5 Paralives destroys the BepInEx manager GameObject during scene
+        // cleanup, so this Update stops firing. The Harmony-driven Tick() below keeps F6
+        // alive by polling from a game method that keeps ticking. Both funnel through
+        // CheckToggle, which de-dupes per frame so overlapping drivers can't double-toggle.
+        private void Update() => CheckToggle();
+
+        internal void Tick() => CheckToggle();
+
+        private void CheckToggle()
         {
-            if (Input.GetKeyDown(KeyCode.F6))
-            {
-                ToggleParaWASD();
-            }
+            if (!Input.GetKeyDown(KeyCode.F6))
+                return;
+            if (Time.frameCount == _lastToggleFrame)
+                return;
+            _lastToggleFrame = Time.frameCount;
+            ToggleParaWASD();
         }
 
         private void ToggleParaWASD()
@@ -136,13 +136,6 @@ namespace ParaWASD
                 _controller.Activate();
                 Logger.LogInfo("ParaWASD mode ENABLED");
             }
-        }
-
-        private void OnDestroy()
-        {
-            _harmony?.UnpatchSelf();
-            if (_controller != null)
-                Destroy(_controller.gameObject);
         }
     }
 }
