@@ -7,6 +7,11 @@
     <Description>WASD movement and first-person camera mod for Paralives</Description>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
   <PropertyGroup Condition="Exists('..\..\BepInEx\core\BepInEx.Unity.Mono.dll')">
     <DefineConstants>$(DefineConstants);BEPINEX_UNITY_MONO</DefineConstants>
   </PropertyGroup>
