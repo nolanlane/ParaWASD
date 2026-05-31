@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Setting;
 using UnityEngine;
@@ -61,6 +62,7 @@ namespace ParaWASD
         private Dictionary<int, int> _menuSelectedIndexByDepth = new Dictionary<int, int>();
         private bool _menuWasVisible;
         private UIInteractionsListItem _lastHoveredItem;
+        private int _suppressInteractionMenuInputFrames;
 
         private void Start()
         {
@@ -180,6 +182,8 @@ namespace ParaWASD
                 HandleMouseLook();
                 if (Input.GetKeyDown(KeyCode.C))
                     TryCancelCurrentAction();
+                if (Input.GetKeyDown(KeyCode.E))
+                    TryOpenCenterInteractionMenu();
             }
 
             bool charBusy = IsCharacterPerformingAction();
@@ -597,6 +601,12 @@ namespace ParaWASD
 
             if (!menuVisible) return;
 
+            if (_suppressInteractionMenuInputFrames > 0)
+            {
+                _suppressInteractionMenuInputFrames--;
+                return;
+            }
+
             SyncMenuDepth(uiInteractions);
             var activeList = GetInteractionList(uiInteractions, _menuActiveDepth);
             if (activeList == null) return;
@@ -734,7 +744,7 @@ namespace ParaWASD
                 return;
             }
 
-            if (_lastHoveredItem != null && (Object)_lastHoveredItem != null && _lastHoveredItem.gameObject != null)
+            if (_lastHoveredItem != null && (UnityEngine.Object)_lastHoveredItem != null && _lastHoveredItem.gameObject != null)
             {
                 var exitData = new PointerEventData(EventSystem.current);
                 ExecuteEvents.Execute(_lastHoveredItem.gameObject, exitData, ExecuteEvents.pointerExitHandler);
@@ -760,6 +770,158 @@ namespace ParaWASD
             ExecuteEvents.Execute(item.gameObject, eventData, ExecuteEvents.pointerDownHandler);
             ExecuteEvents.Execute(item.gameObject, eventData, ExecuteEvents.pointerUpHandler);
             ExecuteEvents.Execute(item.gameObject, eventData, ExecuteEvents.pointerClickHandler);
+        }
+
+        private void TryOpenCenterInteractionMenu()
+        {
+            if (!Plugin.CenterInteractEnabled.Value || _gameCamera == null)
+                return;
+
+            var player = GetPlayer();
+            if (player == null || player.State != GameStates.LiveMode || player.GetSelectedCharacterGUID() == 0)
+                return;
+
+            var uiInteractions = UI.GetOrNull<UIInteractions>(player.PlayerIndex);
+            if (uiInteractions != null && uiInteractions.IsVisible)
+                return;
+
+            var hit = RaycastCenterForInteraction();
+            if (!hit.HasHit)
+            {
+                Debug.Log("[ParaWASD] Center interact found no valid target.");
+                return;
+            }
+
+            if (OpenInteractionMenuForHit(player, hit))
+            {
+                _cursorMode = true;
+                _isTraversingPath = false;
+                _suppressInteractionMenuInputFrames = 1;
+            }
+        }
+
+        private CenterInteractionHit RaycastCenterForInteraction()
+        {
+            CenterInteractionHit result = default;
+            if (_gameCamera == null || UnityLayersManager.Instance == null)
+                return result;
+
+            Physics.SyncTransforms();
+            var ray = _gameCamera.ScreenPointToRay(GetScreenCenterPosition(0));
+            int layerMask = UnityLayersManager.Instance.RaycastLayerMask | (1 << LayerMask.NameToLayer("CharacterVisual"));
+            RaycastHit[] hits = Physics.RaycastAll(ray, Plugin.CenterInteractDistance.Value, layerMask);
+            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                var hit = hits[i];
+                if (hit.collider == null) continue;
+
+                var target = hit.collider.GetComponent<RaycastTarget>();
+                if (target == null) continue;
+
+                if (target.ColliderType == ColliderType.Terrain && RaycastSystem.CheckIfTerrainHole(hit))
+                    continue;
+
+                if (target.ColliderType == ColliderType.Character)
+                {
+                    if (!ulong.TryParse(target.transform.name, out ulong characterGUID))
+                        continue;
+                    if (characterGUID == _followedCharacterGUID)
+                        continue;
+
+                    result.HasHit = true;
+                    result.ColliderType = target.ColliderType;
+                    result.WorldPosition = hit.point;
+                    result.CharacterGUID = characterGUID;
+                    return result;
+                }
+
+                result.HasHit = true;
+                result.ColliderType = target.ColliderType;
+                result.WorldPosition = hit.point;
+                result.RaycastObject = target.RaycastObject;
+                return result;
+            }
+
+            return result;
+        }
+
+        private bool OpenInteractionMenuForHit(Player player, CenterInteractionHit hit)
+        {
+            var uiInteractions = UI.GetOrNull<UIInteractions>(player.PlayerIndex);
+            if (uiInteractions == null)
+                return false;
+
+            var interactions = Settings.Get<Interactions>();
+            if (interactions == null)
+                return false;
+
+            if (hit.ColliderType == ColliderType.Object)
+            {
+                var item = hit.RaycastObject != null ? hit.RaycastObject.GetComponent<ItemObjectRoot>() : null;
+                if (item == null || !InteractionManager.Instance.ItemHasInteractions(item, player.PlayerIndex))
+                    return false;
+
+                var group = InteractionManager.Instance.GetItemInteractionGroup(item);
+                uiInteractions.Show(group, hit.WorldPosition, item.InstanceID, 0UL, item, item.LotPlacedOnGUID);
+                Debug.Log("[ParaWASD] Opened center interaction menu for item.");
+                return true;
+            }
+
+            if (hit.ColliderType == ColliderType.Floor || hit.ColliderType == ColliderType.Terrain)
+            {
+                var group = interactions.GetInteractionGroupByGUID(interactions.FloorInteractions);
+                ulong lotGUID = LotManager.Instance != null ? LotManager.Instance.GetLotFromPosition(hit.WorldPosition) : 0UL;
+                uiInteractions.Show(group, hit.WorldPosition, -1, 0UL, null, lotGUID);
+                Debug.Log("[ParaWASD] Opened center interaction menu for ground.");
+                return true;
+            }
+
+            if (hit.ColliderType == ColliderType.Character)
+            {
+                var targetCharacter = CharacterManager.Instance.GetCharacterByGUID(hit.CharacterGUID);
+                if (targetCharacter == null || targetCharacter.Data.IsDead)
+                    return false;
+
+                ulong groupGUID = InteractionManager.Instance.GetInteractionGroupGUIDFor(interactions, player.SelectedCharactersGUID, hit.CharacterGUID);
+                var group = interactions.GetInteractionGroupByGUID(groupGUID);
+                ulong lotGUID = LotManager.Instance != null ? LotManager.Instance.GetLotFromPosition(hit.WorldPosition) : 0UL;
+                bool canShow = false;
+                foreach (ulong selectedGUID in player.SelectedCharactersGUID)
+                {
+                    if (InteractionManager.Instance.CanShowInteractionGroupInInteractionList(group, null, player.PlayerIndex, selectedGUID, hit.CharacterGUID, lotGUID))
+                    {
+                        canShow = true;
+                        break;
+                    }
+                }
+
+                if (!canShow)
+                    return false;
+
+                uiInteractions.Show(group, hit.WorldPosition, -1, hit.CharacterGUID, null, lotGUID);
+                Debug.Log("[ParaWASD] Opened center interaction menu for character.");
+                return true;
+            }
+
+            return false;
+        }
+
+        private Player GetPlayer()
+        {
+            if (PlayerManager.Instance == null || PlayerManager.Instance.HybridPlayer1 == null)
+                return null;
+            return PlayerManager.Instance.HybridPlayer1.Player;
+        }
+
+        private struct CenterInteractionHit
+        {
+            public bool HasHit;
+            public ColliderType ColliderType;
+            public GameObject RaycastObject;
+            public Vector3 WorldPosition;
+            public ulong CharacterGUID;
         }
 
         private int GetFullAreaMask()

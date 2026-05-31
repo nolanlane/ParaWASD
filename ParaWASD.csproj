@@ -7,12 +7,20 @@
     <Description>WASD movement and first-person camera mod for Paralives</Description>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <BepInExRoot Condition="'$(BepInExRoot)' == ''">..\..\BepInEx</BepInExRoot>
+    <BepInExCorePath>$(BepInExRoot)\core</BepInExCorePath>
+    <BepInExTarget Condition="'$(BepInExTarget)' == '' And Exists('$(BepInExCorePath)\BepInEx.Unity.Mono.dll')">6UnityMono</BepInExTarget>
+    <BepInExTarget Condition="'$(BepInExTarget)' == '' And Exists('$(BepInExCorePath)\BepInEx.Unity.dll')">6Unity</BepInExTarget>
+    <BepInExTarget Condition="'$(BepInExTarget)' == ''">5</BepInExTarget>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
-  <PropertyGroup Condition="Exists('..\..\BepInEx\core\BepInEx.Unity.Mono.dll')">
+  <PropertyGroup Condition="'$(BepInExTarget)' == '6UnityMono'">
     <DefineConstants>$(DefineConstants);BEPINEX_UNITY_MONO</DefineConstants>
   </PropertyGroup>
 
@@ -72,24 +80,24 @@
     </Reference>
 
     <!-- BepInEx + Harmony -->
-    <Reference Include="BepInEx.Core" Condition="Exists('..\..\BepInEx\core\BepInEx.Unity.Mono.dll') Or Exists('..\..\BepInEx\core\BepInEx.Unity.dll')">
-      <HintPath>..\..\BepInEx\core\BepInEx.Core.dll</HintPath>
+    <Reference Include="BepInEx.Core" Condition="'$(BepInExTarget)' == '6UnityMono' Or '$(BepInExTarget)' == '6Unity'">
+      <HintPath>$(BepInExCorePath)\BepInEx.Core.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="BepInEx.Unity.Mono" Condition="Exists('..\..\BepInEx\core\BepInEx.Unity.Mono.dll')">
-      <HintPath>..\..\BepInEx\core\BepInEx.Unity.Mono.dll</HintPath>
+    <Reference Include="BepInEx.Unity.Mono" Condition="'$(BepInExTarget)' == '6UnityMono'">
+      <HintPath>$(BepInExCorePath)\BepInEx.Unity.Mono.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="BepInEx.Unity" Condition="!Exists('..\..\BepInEx\core\BepInEx.Unity.Mono.dll') And Exists('..\..\BepInEx\core\BepInEx.Unity.dll')">
-      <HintPath>..\..\BepInEx\core\BepInEx.Unity.dll</HintPath>
+    <Reference Include="BepInEx.Unity" Condition="'$(BepInExTarget)' == '6Unity'">
+      <HintPath>$(BepInExCorePath)\BepInEx.Unity.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="BepInEx" Condition="!Exists('..\..\BepInEx\core\BepInEx.Unity.Mono.dll') And !Exists('..\..\BepInEx\core\BepInEx.Unity.dll')">
-      <HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
+    <Reference Include="BepInEx" Condition="'$(BepInExTarget)' == '5'">
+      <HintPath>$(BepInExCorePath)\BepInEx.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>$(BepInExCorePath)\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

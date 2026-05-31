@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ParaWASD
 {
-    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.96.1-beta")]
+    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.97.0-beta")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -24,6 +24,8 @@ namespace ParaWASD
         internal static ConfigEntry<float> ForwardOffset { get; private set; }
         internal static ConfigEntry<float> MoveSpeed { get; private set; }
         internal static ConfigEntry<float> SprintMultiplier { get; private set; }
+        internal static ConfigEntry<bool> CenterInteractEnabled { get; private set; }
+        internal static ConfigEntry<float> CenterInteractDistance { get; private set; }
 
         private Harmony _harmony;
         private ParaWASDController _controller;
@@ -96,6 +98,13 @@ namespace ParaWASD
                 "SprintMultiplier",
                 2.0f,
                 new ConfigDescription("Movement speed multiplier while holding Left Shift.", new AcceptableValueRange<float>(1f, 4f)));
+
+            CenterInteractEnabled = Config.Bind("Interaction", "CenterInteractEnabled", true, "Press E in look mode to open interactions for the object, floor, terrain, or character at the center of the camera.");
+            CenterInteractDistance = Config.Bind(
+                "Interaction",
+                "CenterInteractDistance",
+                25f,
+                new ConfigDescription("Maximum distance for center-screen look interactions.", new AcceptableValueRange<float>(1f, 100f)));
         }
 
         private void Update()
