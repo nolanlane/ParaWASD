@@ -8,7 +8,9 @@ using UnityEngine;
 
 namespace ParaWASD
 {
-    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.97.2-beta")]
+    // BepInEx 5 parses this with System.Version, which rejects pre-release suffixes
+    // like "-beta". Keep it strictly numeric; the "beta" label lives in the release only.
+    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.97.3")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
