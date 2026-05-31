@@ -6,7 +6,7 @@
 
 ParaWASD is a BepInEx plugin for Paralives that adds an eye-level camera and direct WASD movement for the selected Para.
 
-Version: 0.96b
+Version: 0.96c
 
 ## Features
 
@@ -18,6 +18,7 @@ Version: 0.96b
 - Use cursor mode to interact with world objects and menus.
 - Navigate interaction menus and submenus from the keyboard.
 - Automatically opens nearby doors while moving.
+- Tune mouse look, camera, and movement settings through the BepInEx config file.
 - Restores the game camera, cursor, visibility, and selected-Para autonomy setting when disabled.
 
 ## Requirements
@@ -34,7 +35,7 @@ ParaWASD does not include BepInEx. Install BepInEx first, then install the plugi
    - ParaWASD is built for BepInEx 6 Unity Mono. Do not use the IL2CPP build.
    - Extract BepInEx into the Paralives game folder, the same folder that contains the game executable.
    - Start the game once so BepInEx can create its folders, then close the game.
-2. Download [ParaWASD-0.96b.zip](https://github.com/nolanlane/ParaWASD/releases/download/0.96b/ParaWASD-0.96b.zip).
+2. Download [ParaWASD-0.96c.zip](https://github.com/nolanlane/ParaWASD/releases/download/0.96c/ParaWASD-0.96c.zip).
 3. Extract the ParaWASD zip into the Paralives game folder.
 4. Start the game.
 
@@ -54,6 +55,18 @@ BepInEx/plugins/ParaWASD.dll
 | `Left Shift` | Sprint |
 | `C` | Cancel the current queued action |
 | `Left Alt` | Toggle cursor mode |
+
+## Configuration
+
+After ParaWASD runs once, BepInEx creates the config file at:
+
+```text
+BepInEx/config/com.knowyourlane.parawasd.cfg
+```
+
+You can adjust mouse sensitivity, invert mouse Y, pitch limits, field of view, optional camera smoothing, camera offsets, movement speed, and sprint speed.
+
+The default settings are the tested values. Changing them can make the camera or movement unstable and may break or crash the game. If that happens, restore the defaults or delete the config file so BepInEx can recreate it.
 
 ## Interaction Menus
 

@@ -12,12 +12,6 @@ namespace ParaWASD
     {
         public static ParaWASDController ActiveInstance { get; private set; }
 
-        // Config
-        private float _mouseSensitivity = 2.0f;
-        private float _moveSpeed = 3.0f;
-        private float _eyeHeightOffset = 0.15f;
-        private float _forwardOffset = 0.05f;
-
         // State
         public bool IsActive { get; private set; }
         public bool IsCursorMode => _cursorMode;
@@ -40,6 +34,8 @@ namespace ParaWASD
         // Character reference
         private ulong _followedCharacterGUID;
         private CharacterVisual _followedVisual;
+        private bool _usingFallbackHeadTransform;
+        private bool _snapCameraNextFrame;
 
         // Fallback path traversal
         private NavMeshPath _navPath;
@@ -132,6 +128,7 @@ namespace ParaWASD
             _menuSelectedIndexByDepth.Clear();
             _menuWasVisible = false;
             _lastHoveredItem = null;
+            _snapCameraNextFrame = true;
         }
 
         public void Deactivate()
@@ -263,15 +260,18 @@ namespace ParaWASD
             if (_followedVisual == null)
                 return false;
 
+            _usingFallbackHeadTransform = false;
             if (_followedVisual.BoneTransformByName != null &&
                 _followedVisual.BoneTransformByName.TryGetValue("Head", out var headBoneData))
             {
                 _headBone = headBoneData.Transform;
+                _snapCameraNextFrame = true;
                 return _headBone != null;
             }
 
             _headBone = _followedVisual.transform;
-            _eyeHeightOffset = 1.6f;
+            _usingFallbackHeadTransform = true;
+            _snapCameraNextFrame = true;
             return true;
         }
 
@@ -280,9 +280,16 @@ namespace ParaWASD
             Vector2 delta = _mouseDeltaThisFrame;
             if (delta.x == 0f && delta.y == 0f) return;
 
-            _yaw += delta.x * _mouseSensitivity * 0.1f;
-            _pitch -= delta.y * _mouseSensitivity * 0.1f;
-            _pitch = Mathf.Clamp(_pitch, -80f, 80f);
+            float mouseSensitivity = Plugin.MouseSensitivity.Value;
+            float pitchDelta = (Plugin.InvertMouseY.Value ? delta.y : -delta.y) * mouseSensitivity * 0.1f;
+            _yaw += delta.x * mouseSensitivity * 0.1f;
+            _pitch += pitchDelta;
+
+            float pitchMin = Mathf.Min(Plugin.PitchMinimum.Value, Plugin.PitchMaximum.Value);
+            float pitchMax = Mathf.Max(Plugin.PitchMinimum.Value, Plugin.PitchMaximum.Value);
+            if (Mathf.Approximately(pitchMin, pitchMax))
+                pitchMax = pitchMin + 1f;
+            _pitch = Mathf.Clamp(_pitch, pitchMin, pitchMax);
         }
 
         private Vector2 ReadMouseDelta()
@@ -386,8 +393,7 @@ namespace ParaWASD
             var right = new Vector3(forward.z, 0, -forward.x);
             var moveDir = (forward * v + right * h).normalized;
 
-            float speed = _moveSpeed;
-            if (Input.GetKey(KeyCode.LeftShift)) speed *= 2f;
+            float speed = GetMoveSpeed();
 
             var currentPos = characterAsset.Data.Position;
             var desiredPos = currentPos + moveDir * speed * Time.deltaTime;
@@ -488,8 +494,7 @@ namespace ParaWASD
                 return;
             }
 
-            float speed = _moveSpeed;
-            if (Input.GetKey(KeyCode.LeftShift)) speed *= 2f;
+            float speed = GetMoveSpeed();
             if (Input.GetKey(KeyCode.S))
             {
                 _isTraversingPath = false;
@@ -811,14 +816,40 @@ namespace ParaWASD
         {
             if (_gameCamera == null || _headBone == null) return;
 
-            Quaternion camRotation = Quaternion.Euler(_pitch, _yaw, 0);
-            Vector3 eyePos = _headBone.position
-                + Vector3.up * _eyeHeightOffset
-                + GetCharacterForward() * _forwardOffset;
+            Quaternion targetRotation = Quaternion.Euler(_pitch, _yaw, 0);
+            Vector3 targetPosition = _headBone.position
+                + Vector3.up * GetEyeHeightOffset()
+                + GetCharacterForward() * Plugin.ForwardOffset.Value;
 
-            _gameCamera.transform.position = eyePos;
-            _gameCamera.transform.rotation = camRotation;
-            _gameCamera.fieldOfView = 70f;
+            float smoothing = Plugin.CameraSmoothing.Value;
+            if (_snapCameraNextFrame || smoothing <= 0f)
+            {
+                _gameCamera.transform.position = targetPosition;
+                _gameCamera.transform.rotation = targetRotation;
+                _snapCameraNextFrame = false;
+            }
+            else
+            {
+                float t = 1f - Mathf.Exp(-smoothing * Time.deltaTime);
+                _gameCamera.transform.position = Vector3.Lerp(_gameCamera.transform.position, targetPosition, t);
+                _gameCamera.transform.rotation = Quaternion.Slerp(_gameCamera.transform.rotation, targetRotation, t);
+            }
+            _gameCamera.fieldOfView = Plugin.FieldOfView.Value;
+        }
+
+        private float GetMoveSpeed()
+        {
+            float speed = Plugin.MoveSpeed.Value;
+            if (Input.GetKey(KeyCode.LeftShift))
+                speed *= Plugin.SprintMultiplier.Value;
+            return speed;
+        }
+
+        private float GetEyeHeightOffset()
+        {
+            return _usingFallbackHeadTransform
+                ? Plugin.FallbackEyeHeightOffset.Value
+                : Plugin.EyeHeightOffset.Value;
         }
 
         private AssetCharacter GetFollowedCharacterAsset()
