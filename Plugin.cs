@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ParaWASD
 {
-    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.97.0-beta")]
+    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.97.1-beta")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
