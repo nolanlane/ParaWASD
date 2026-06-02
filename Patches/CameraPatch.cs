@@ -51,6 +51,67 @@ namespace ParaWASD.Patches
         static void Postfix() => Plugin.Instance?.Tick();
     }
 
+    /// <summary>
+    /// While a ParaWASD conversation is open, block the game's world click-selection
+    /// (UpdateSelect handles selecting Paras, items, walls, floors and terrain on click).
+    /// The conversation dialog and the together-card UI are Unity UI canvases that handle
+    /// their own clicks through the EventSystem, so they stay fully usable; only world
+    /// objects/Paras become unselectable, as required for the conversation mode.
+    /// </summary>
+    [HarmonyPatch(typeof(UpdateSelect), "UpdateForPlayer")]
+    public static class UpdateSelectConversationPatch
+    {
+        static bool Prefix()
+        {
+            var c = ParaWASDController.ActiveInstance;
+            return c == null || !c.IsInConversation;
+        }
+    }
+
+    /// <summary>
+    /// While a ParaWASD conversation is open, suppress world hover-highlighting.
+    /// The center-locked look raycast points straight at the conversation partner,
+    /// so without this UpdateHover would keep the Para outlined for the whole
+    /// conversation. UpdateSelect (click-selection) is blocked separately above.
+    /// </summary>
+    [HarmonyPatch(typeof(UpdateHover), "UpdateForPlayer")]
+    public static class UpdateHoverConversationPatch
+    {
+        static bool Prefix()
+        {
+            var c = ParaWASDController.ActiveInstance;
+            return c == null || !c.IsInConversation;
+        }
+    }
+
+    /// <summary>
+    /// Hide the base-game together meter (UICharactersTogetherBar, shown above the
+    /// character portraits) while a ParaWASD conversation is open, so only our own
+    /// in-dialog meter is visible. A CanvasGroup keeps the whole bar hidden and
+    /// non-interactive without touching the game's list pooling or active state; the
+    /// bar's own Update restores it the moment the conversation ends.
+    /// </summary>
+    [HarmonyPatch(typeof(UICharactersTogetherBar), "Update")]
+    public static class TogetherBarHidePatch
+    {
+        static void Postfix(UICharactersTogetherBar __instance)
+        {
+            var c = ParaWASDController.ActiveInstance;
+            bool hide = c != null && c.IsInConversation;
+
+            var cg = __instance.GetComponent<CanvasGroup>();
+            if (cg == null)
+            {
+                if (!hide) return;
+                cg = __instance.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            cg.alpha = hide ? 0f : 1f;
+            cg.interactable = !hide;
+            cg.blocksRaycasts = !hide;
+        }
+    }
+
     [HarmonyPatch(typeof(InputManager), "GetCursorPosition")]
     public static class InputManagerCursorPositionPatch
     {

@@ -50,6 +50,10 @@
       <HintPath>..\..\Paralives_Data\Managed\UnityEngine.AIModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="NavMeshComponents">
+      <HintPath>..\..\Paralives_Data\Managed\NavMeshComponents.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.AnimationModule">
       <HintPath>..\..\Paralives_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
       <Private>false</Private>
@@ -64,6 +68,14 @@
     </Reference>
     <Reference Include="UnityEngine.UIModule">
       <HintPath>..\..\Paralives_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\Paralives_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\Paralives_Data\Managed\Unity.TextMeshPro.dll</HintPath>
       <Private>false</Private>
     </Reference>
 

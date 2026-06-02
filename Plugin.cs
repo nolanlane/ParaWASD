@@ -7,7 +7,7 @@ namespace ParaWASD
 {
     // BepInEx 5 parses this with System.Version, which rejects pre-release suffixes
     // like "-beta". Keep it strictly numeric; any "beta" label lives in the release only.
-    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.96.5")]
+    [BepInPlugin("com.parawasd.plugin", "ParaWASD", "0.97.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -21,8 +21,11 @@ namespace ParaWASD
         internal static ConfigEntry<float> EyeHeightOffset { get; private set; }
         internal static ConfigEntry<float> FallbackEyeHeightOffset { get; private set; }
         internal static ConfigEntry<float> ForwardOffset { get; private set; }
+        internal static ConfigEntry<bool> ShowSelfShadow { get; private set; }
         internal static ConfigEntry<float> MoveSpeed { get; private set; }
         internal static ConfigEntry<float> SprintMultiplier { get; private set; }
+        internal static ConfigEntry<bool> CenterInteractEnabled { get; private set; }
+        internal static ConfigEntry<float> CenterInteractDistance { get; private set; }
 
         private Harmony _harmony;
         private ParaWASDController _controller;
@@ -84,6 +87,11 @@ namespace ParaWASD
                 "ForwardOffset",
                 0.05f,
                 new ConfigDescription("Forward camera offset from the Para head position.", new AcceptableValueRange<float>(-0.2f, 0.4f)));
+            ShowSelfShadow = Config.Bind(
+                "Camera",
+                "ShowSelfShadow",
+                true,
+                "Keep the followed Para's shadow visible in first person. The body stays hidden from the camera but still casts a shadow on the ground and walls. Disable for the old fully-hidden behavior.");
 
             MoveSpeed = Config.Bind(
                 "Movement",
@@ -95,6 +103,17 @@ namespace ParaWASD
                 "SprintMultiplier",
                 2.0f,
                 new ConfigDescription("Movement speed multiplier while holding Left Shift.", new AcceptableValueRange<float>(1f, 4f)));
+
+            CenterInteractEnabled = Config.Bind(
+                "Interaction",
+                "CenterInteractEnabled",
+                true,
+                "Press E in look mode to open interactions for the object, floor, terrain, or character at the center of the camera.");
+            CenterInteractDistance = Config.Bind(
+                "Interaction",
+                "CenterInteractDistance",
+                25f,
+                new ConfigDescription("Maximum distance for center-screen look interactions.", new AcceptableValueRange<float>(1f, 100f)));
         }
 
         private int _lastToggleFrame = -1;
@@ -128,6 +147,12 @@ namespace ParaWASD
             }
             else if (_controller.IsActive)
             {
+                if (_controller.BlocksDeactivation)
+                {
+                    Logger.LogInfo("ParaWASD is in a conversation. Press Q to end the conversation first.");
+                    return;
+                }
+
                 _controller.Deactivate();
                 Logger.LogInfo("ParaWASD mode DISABLED");
             }

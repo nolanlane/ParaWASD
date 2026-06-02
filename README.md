@@ -6,7 +6,7 @@
 
 ParaWASD is a BepInEx plugin for Paralives that adds an eye-level camera and direct WASD movement for the selected Para.
 
-Version: 0.96.5
+Version: 0.97.0
 
 ## Features
 
@@ -15,11 +15,14 @@ Version: 0.96.5
 - Look around with the mouse from an eye-level camera.
 - Hold `Left Shift` to sprint.
 - Press `C` to cancel the current queued action.
-- Use cursor mode to interact with world objects and menus.
-- Navigate interaction menus and submenus from the keyboard.
-- Automatically opens nearby doors while moving.
+- Look at something and press `E` to open its interactions right from the crosshair.
+- Walk up to another Para and press `E` to start a conversation, with the together cards driven from the keyboard.
+- Swap between household Paras without leaving first person using `[` and `]`.
+- Navigate interaction menus and the conversation from the keyboard, or tap `Left Alt` to bring the mouse back when you want it.
+- Automatically opens nearby doors and handles short stairs and steps while moving.
+- Walls, floors, fog, and your own Para's shadow are tuned to look right from inside a room instead of from the overhead camera.
 - Tune mouse look, camera, and movement settings through the BepInEx config file.
-- Restores the game camera, cursor, visibility, and selected-Para autonomy setting when disabled.
+- Cleanly restores the game camera, cursor, and visibility when disabled, and never changes your saved autonomy setting.
 
 ## Requirements
 
@@ -35,7 +38,7 @@ ParaWASD does not include BepInEx. Install BepInEx first, then install the plugi
    - ParaWASD is built for BepInEx 5 (Windows x64).
    - Extract BepInEx into the Paralives game folder, the same folder that contains the game executable.
    - Start the game once so BepInEx can create its folders, then close the game.
-2. Download [ParaWASD-0.96.5.zip](https://github.com/nolanlane/ParaWASD/releases/download/0.96.5/ParaWASD-0.96.5.zip).
+2. Download [ParaWASD-0.97.0.zip](https://github.com/nolanlane/ParaWASD/releases/download/0.97.0/ParaWASD-0.97.0.zip).
 3. Extract the ParaWASD zip into the Paralives game folder.
 4. Start the game.
 
@@ -53,7 +56,9 @@ BepInEx/plugins/ParaWASD.dll
 | `Mouse` | Look around |
 | `W/A/S/D` | Move |
 | `Left Shift` | Sprint |
+| `E` | Interact with whatever the crosshair is on, or talk to a nearby Para |
 | `C` | Cancel the current queued action |
+| `[` / `]` | Switch to the previous / next household Para |
 | `Left Alt` | Toggle cursor mode |
 
 ## Configuration
@@ -76,10 +81,24 @@ The default settings are the tested values. Changing them can make the camera or
 | `D` or `Right` | Open submenu |
 | `A` or `Left` | Return to parent menu |
 | `Enter`, `Keypad Enter`, or `E` | Open submenu or choose action |
+| `Q` | Close the menu |
+
+The menu opens in keyboard mode so you can pick an action without ever touching the mouse. If you'd rather click, tap `Left Alt` to bring the cursor back.
+
+## Conversations
+
+Look at another Para and press `E` to walk over and start talking. The conversation runs entirely from the keyboard:
+
+| Key | Action |
+| --- | --- |
+| `E` | Start talking, then choose the highlighted together card |
+| `Left/Right` or `A/D` | Browse the together cards |
+| `R` | Switch a card's variant when one is available |
+| `Q` | End the conversation (or back out of choosing who to involve) |
 
 ## Known Issues
 
-- Stairs are not supported yet.
+- Stairs and steps mostly work now, but unusual layouts can still trip up the pathing.
 - Movement can be uneven around tight spaces, unusual lots, or complex NavMesh layouts.
 - ParaWASD is intended for mouse and keyboard play.
 
